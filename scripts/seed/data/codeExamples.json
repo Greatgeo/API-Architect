@@ -1,0 +1,173 @@
+[
+  {
+    "_id": "example.aster.fetch-balance-ts",
+    "_type": "codeExample",
+    "title": "Fetch Wallet Balance on Base with TypeScript",
+    "language": "typescript",
+    "framework": "Node.js 20+",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.aster.wallet-balance" },
+    "description": "Demonstrates fetching native ETH balance on Base network using native fetch.",
+    "code": "import { fetch } from 'undici';\n\ninterface BalanceResponse {\n  address: string;\n  balanceWei: string;\n  balanceEth: string;\n}\n\nasync function getBaseBalance(address: string): Promise<BalanceResponse> {\n  const apiKey = process.env.ASTER_API_KEY;\n  if (!apiKey) throw new Error('Missing ASTER_API_KEY');\n\n  const res = await fetch(`https://api-architect.internal/demo/v2/base/wallets/${address}/balance`, {\n    headers: {\n      'Authorization': `Bearer ${apiKey}`,\n      'Accept': 'application/json'\n    }\n  });\n\n  if (!res.ok) {\n    throw new Error(`Aster API Error: ${res.status} ${res.statusText}`);\n  }\n\n  return res.json() as Promise<BalanceResponse>;\n}",
+    "prerequisites": ["npm install typescript @types/node"],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" }
+    ]
+  },
+  {
+    "_id": "example.aster.transfer-webhooks-express",
+    "_type": "codeExample",
+    "title": "Express Inbound Webhook Listener with HMAC Verification",
+    "language": "typescript",
+    "framework": "Express 4/5",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.aster.webhooks-register" },
+    "description": "Securely ingests token transfer events pushed by Aster Protocol and verifies HMAC-SHA256 signature.",
+    "code": "import express, { Request, Response } from 'express';\nimport crypto from 'crypto';\n\nconst app = express();\nconst WEBHOOK_SECRET = process.env.ASTER_WEBHOOK_SECRET || '';\n\n// Mount raw body middleware specifically for webhook signatures\napp.post('/api/webhooks/aster',\n  express.raw({ type: 'application/json' }),\n  (req: Request, res: Response) => {\n    const signature = req.headers['x-aster-signature'] as string;\n    const rawBody = req.body as Buffer;\n\n    const computed = crypto\n      .createHmac('sha256', WEBHOOK_SECRET)\n      .update(rawBody)\n      .digest('hex');\n\n    if (!crypto.timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(computed, 'hex'))) {\n      return res.status(401).send('Invalid Signature');\n    }\n\n    const payload = JSON.parse(rawBody.toString('utf-8'));\n    console.log(`[Token Transfer] ${payload.token} on ${payload.network}: ${payload.value}`);\n\n    // Immediately acknowledge HTTP 200 within 5 seconds\n    res.status(200).json({ status: 'received' });\n  }\n);",
+    "prerequisites": ["npm install express @types/express"],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.webhook-notifications" },
+      { "_type": "reference", "_ref": "capability.token-transfer-events" }
+    ]
+  },
+  {
+    "_id": "example.orbit.subscribe-curl",
+    "_type": "codeExample",
+    "title": "Register Webhook Subscription via cURL",
+    "language": "curl",
+    "framework": "Terminal CLI",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.orbit.webhooks-create" },
+    "description": "Registers an HTTPS callback destination for Ethereum and Base transfer events.",
+    "code": "curl -X POST https://api-architect.internal/demo/v3/webhooks/destinations \\\n  -H \"Authorization: Bearer $ORBIT_API_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"destinationUrl\": \"https://api.myapp.com/webhooks/transfers\",\n    \"networks\": [\"ethereum\", \"base\"],\n    \"eventTypes\": [\"transfer\"]\n  }'",
+    "prerequisites": ["curl installed in path"],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.webhook-notifications" }
+    ]
+  },
+  {
+    "_id": "example.northstar.polling-loop-ts",
+    "_type": "codeExample",
+    "title": "Polling Fallback Loop for Token Transfers (Northstar)",
+    "language": "typescript",
+    "framework": "Node.js",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.northstar.tx-history" },
+    "description": "Polls transaction history at 12-second intervals while respecting the 10 RPS rate limit.",
+    "code": "async function pollTransfers(address: string) {\n  let lastSeenTimestamp = Date.now();\n  const apiKey = process.env.NORTHSTAR_API_KEY;\n\n  setInterval(async () => {\n    try {\n      const res = await fetch(`https://api-architect.internal/demo/v1/wallets/${address}/transactions?since=${lastSeenTimestamp}`, {\n        headers: { 'X-API-Key': apiKey || '' }\n      });\n      if (res.status === 429) {\n        console.warn('Northstar rate limit hit, backing off...');\n        return;\n      }\n      const data = await res.json();\n      if (data.transactions?.length > 0) {\n        lastSeenTimestamp = Date.now();\n        console.log(`Discovered ${data.transactions.length} new transactions`);\n      }\n    } catch (err) {\n      console.error('Polling error:', err);\n    }\n  }, 12_000);\n}",
+    "prerequisites": ["npm install node-fetch"],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.transaction-history" }
+    ]
+  },
+  {
+    "_id": "example.helios.rpc-call-python",
+    "_type": "codeExample",
+    "title": "JSON-RPC Call to Base via Python Requests",
+    "language": "python",
+    "framework": "Python 3.10+",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.helios.rpc" },
+    "description": "Executes eth_blockNumber JSON-RPC request to Helios Base node.",
+    "code": "import os\nimport requests\n\ndef get_base_block_number():\n    api_key = os.environ.get('HELIOS_API_KEY')\n    url = f\"https://api-architect.internal/demo/v4/base/rpc?key={api_key}\"\n    \n    payload = {\n        \"jsonrpc\": \"2.0\",\n        \"method\": \"eth_blockNumber\",\n        \"params\": [],\n        \"id\": 1\n    }\n    \n    response = requests.post(url, json=payload, timeout=5)\n    response.raise_for_status()\n    data = response.json()\n    \n    block_num_hex = data['result']\n    return int(block_num_hex, 16)\n\nprint(f\"Current Base Block: {get_base_block_number()}\")",
+    "prerequisites": ["pip install requests"],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.rpc-access" }
+    ]
+  },
+  {
+    "_id": "example.solis.spl-balance-js",
+    "_type": "codeExample",
+    "title": "Query SPL Token Accounts on Solana with JavaScript",
+    "language": "javascript",
+    "framework": "Node.js ES Modules",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.solis.tokens" },
+    "description": "Demonstrates querying SPL token holdings on Solana for a base58 address.",
+    "code": "export async function getSolanaTokens(pubkey) {\n  const apiKey = process.env.SOLIS_API_KEY;\n  const response = await fetch(`https://api-architect.internal/demo/v2/accounts/${pubkey}/spl-tokens`, {\n    headers: { 'Authorization': `Bearer ${apiKey}` }\n  });\n\n  if (!response.ok) {\n    throw new Error(`Solis API error: ${response.status}`);\n  }\n\n  const { tokens } = await response.json();\n  return tokens.map(t => ({\n    mint: t.mint,\n    amount: t.amountUi,\n    decimals: t.decimals\n  }));\n}",
+    "prerequisites": [],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.token-balance" }
+    ]
+  },
+  {
+    "_id": "example.nexus.portfolio-ts",
+    "_type": "codeExample",
+    "title": "Cross-Chain Portfolio Aggregation in TypeScript",
+    "language": "typescript",
+    "framework": "Node.js",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.nexus.portfolio" },
+    "description": "Queries total net worth across Ethereum and Base with local memory caching.",
+    "code": "interface PortfolioNetWorth {\n  totalUsd: number;\n  networks: Record<string, { balanceUsd: number }>;\n}\n\nlet cache: { data: PortfolioNetWorth; expiresAt: number } | null = null;\n\nexport async function getAggregatedPortfolio(address: string): Promise<PortfolioNetWorth> {\n  if (cache && cache.expiresAt > Date.now()) {\n    return cache.data;\n  }\n\n  const apiKey = process.env.NEXUS_API_KEY;\n  const res = await fetch(`https://api-architect.internal/demo/v1/portfolio/${address}?networks=ethereum,base`, {\n    headers: { 'X-API-Key': apiKey || '' }\n  });\n\n  const data = (await res.json()) as PortfolioNetWorth;\n  cache = { data, expiresAt: Date.now() + 60_000 }; // 60s cache\n  return data;\n}",
+    "prerequisites": ["npm install typescript"],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.portfolio-aggregation" },
+      { "_type": "reference", "_ref": "capability.multi-chain-aggregation" }
+    ]
+  },
+  {
+    "_id": "example.quanta.filter-logs-ts",
+    "_type": "codeExample",
+    "title": "Filtering Smart Contract Event Logs with Quanta",
+    "language": "typescript",
+    "framework": "Node.js",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.quanta.logs" },
+    "description": "Demonstrates querying Transfer(address,address,uint256) topic logs on Base.",
+    "code": "export async function queryTransferLogs(contractAddress: string, fromBlock: number, toBlock: number) {\n  const apiKey = process.env.QUANTA_API_KEY;\n  const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';\n\n  const res = await fetch('https://api-architect.internal/demo/v2/base/logs/filter', {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      'X-API-Key': apiKey || ''\n    },\n    body: JSON.stringify({\n      address: contractAddress,\n      topics: [TRANSFER_TOPIC],\n      fromBlock,\n      toBlock\n    })\n  });\n\n  return res.json();\n}",
+    "prerequisites": [],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.contract-event-logs" }
+    ]
+  },
+  {
+    "_id": "example.vanguard.gas-estimate-curl",
+    "_type": "codeExample",
+    "title": "Fetch EIP-1559 Gas Recommendations via cURL",
+    "language": "curl",
+    "framework": "Shell",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.vanguard.gas" },
+    "description": "Queries rapid, standard, and slow tip recommendations for Base network.",
+    "code": "curl -X GET https://api-architect.internal/demo/v3/base/gas/recommended \\\n  -H \"X-API-Key: $VANGUARD_API_KEY\"",
+    "prerequisites": [],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.gas-estimation" }
+    ]
+  },
+  {
+    "_id": "example.strata.settlement-python",
+    "_type": "codeExample",
+    "title": "Check Payment Settlement Finality with Python",
+    "language": "python",
+    "framework": "Python 3",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.strata.settlement" },
+    "description": "Polls transaction hash for confirmed finality depth.",
+    "code": "import os\nimport requests\n\ndef verify_settlement(tx_hash: str):\n    key = os.environ.get('STRATA_API_KEY')\n    res = requests.get(\n        f\"https://api-architect.internal/demo/v1/settlements/{tx_hash}\",\n        headers={\"X-API-Key\": key}\n    )\n    data = res.json()\n    return data.get('status') == 'FINALIZED' and data.get('confirmations', 0) >= 32",
+    "prerequisites": ["pip install requests"],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.transaction-lookup" }
+    ]
+  },
+  {
+    "_id": "example.beacon.monitor-address-ts",
+    "_type": "codeExample",
+    "title": "Create Continuous Address Monitor in TypeScript",
+    "language": "typescript",
+    "framework": "Node.js",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.beacon.monitor" },
+    "description": "Registers an address with Beacon for automatic high-value threshold alerts.",
+    "code": "export async function registerMonitor(address: string, thresholdUsd: number) {\n  const token = process.env.BEACON_BEARER_TOKEN;\n  const res = await fetch('https://api-architect.internal/demo/v1/monitors', {\n    method: 'POST',\n    headers: {\n      'Authorization': `Bearer ${token}`,\n      'Content-Type': 'application/json'\n    },\n    body: JSON.stringify({ address, thresholdUsd })\n  });\n  return res.json();\n}",
+    "prerequisites": [],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.address-monitoring" }
+    ]
+  },
+  {
+    "_id": "example.zenith.stream-subscription-ts",
+    "_type": "codeExample",
+    "title": "Subscribe to Address Activity Stream in TypeScript",
+    "language": "typescript",
+    "framework": "Node.js",
+    "endpoint": { "_type": "reference", "_ref": "endpoint.zenith.activity-stream" },
+    "description": "Sets up live event trapping for Ethereum and Base wallet activity.",
+    "code": "export async function subscribeToAddressActivity(address: string, webhookUrl: string) {\n  const key = process.env.ZENITH_API_KEY;\n  const res = await fetch('https://api-architect.internal/demo/v1/subscriptions/address-stream', {\n    method: 'POST',\n    headers: {\n      'X-API-Key': key || '',\n      'Content-Type': 'application/json'\n    },\n    body: JSON.stringify({\n      addresses: [address],\n      destinationUrl: webhookUrl,\n      networks: ['ethereum', 'base']\n    })\n  });\n  return res.json();\n}",
+    "prerequisites": [],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-activity" },
+      { "_type": "reference", "_ref": "capability.webhook-notifications" }
+    ]
+  }
+]

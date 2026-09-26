@@ -1,0 +1,212 @@
+[
+  {
+    "_id": "network.ethereum",
+    "_type": "network",
+    "name": "Ethereum Mainnet",
+    "slug": { "_type": "slug", "current": "ethereum" },
+    "type": "evm",
+    "chainId": "1",
+    "environment": "mainnet",
+    "supportedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" },
+      { "_type": "reference", "_ref": "capability.token-balance" },
+      { "_type": "reference", "_ref": "capability.token-transfer-events" },
+      { "_type": "reference", "_ref": "capability.transaction-history" },
+      { "_type": "reference", "_ref": "capability.contract-event-logs" },
+      { "_type": "reference", "_ref": "capability.rpc-access" },
+      { "_type": "reference", "_ref": "capability.smart-contract-calls" },
+      { "_type": "reference", "_ref": "capability.gas-estimation" }
+    ],
+    "limitations": [
+      {
+        "_type": "limitation",
+        "title": "Variable Base Fee Spikes",
+        "description": "EIP-1559 gas spikes require dynamic tip and max-fee estimation.",
+        "severity": "warning"
+      }
+    ],
+    "documentationUrl": "https://ethereum.org/en/developers/docs/"
+  },
+  {
+    "_id": "network.base",
+    "_type": "network",
+    "name": "Base",
+    "slug": { "_type": "slug", "current": "base" },
+    "type": "layer2",
+    "chainId": "8453",
+    "environment": "mainnet",
+    "supportedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" },
+      { "_type": "reference", "_ref": "capability.token-balance" },
+      { "_type": "reference", "_ref": "capability.token-transfer-events" },
+      { "_type": "reference", "_ref": "capability.transaction-history" },
+      { "_type": "reference", "_ref": "capability.webhook-notifications" },
+      { "_type": "reference", "_ref": "capability.rpc-access" },
+      { "_type": "reference", "_ref": "capability.gas-estimation" }
+    ],
+    "limitations": [
+      {
+        "_type": "limitation",
+        "title": "Sub-Second Block Times",
+        "description": "2-second slot frequency requires fast indexing queues to prevent event lag.",
+        "severity": "info"
+      }
+    ],
+    "documentationUrl": "https://docs.base.org/"
+  },
+  {
+    "_id": "network.polygon",
+    "_type": "network",
+    "name": "Polygon PoS",
+    "slug": { "_type": "slug", "current": "polygon" },
+    "type": "sidechain",
+    "chainId": "137",
+    "environment": "mainnet",
+    "supportedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" },
+      { "_type": "reference", "_ref": "capability.token-balance" },
+      { "_type": "reference", "_ref": "capability.transaction-history" },
+      { "_type": "reference", "_ref": "capability.contract-event-logs" },
+      { "_type": "reference", "_ref": "capability.rpc-access" }
+    ],
+    "limitations": [
+      {
+        "_type": "limitation",
+        "title": "Frequent Re-org Depth",
+        "description": "Re-orgs up to 64 blocks can occur; wait for 128 confirmations for high-value settlement.",
+        "severity": "warning"
+      }
+    ],
+    "documentationUrl": "https://docs.polygon.technology/"
+  },
+  {
+    "_id": "network.arbitrum",
+    "_type": "network",
+    "name": "Arbitrum One",
+    "slug": { "_type": "slug", "current": "arbitrum" },
+    "type": "layer2",
+    "chainId": "42161",
+    "environment": "mainnet",
+    "supportedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" },
+      { "_type": "reference", "_ref": "capability.token-balance" },
+      { "_type": "reference", "_ref": "capability.token-transfer-events" },
+      { "_type": "reference", "_ref": "capability.rpc-access" },
+      { "_type": "reference", "_ref": "capability.smart-contract-calls" }
+    ],
+    "limitations": [
+      {
+        "_type": "limitation",
+        "title": "Sequencer Feed Dependencies",
+        "description": "Requires fallbacks if the central sequencer feed exhibits transient pauses.",
+        "severity": "info"
+      }
+    ],
+    "documentationUrl": "https://docs.arbitrum.io/"
+  },
+  {
+    "_id": "network.optimism",
+    "_type": "network",
+    "name": "OP Mainnet",
+    "slug": { "_type": "slug", "current": "optimism" },
+    "type": "layer2",
+    "chainId": "10",
+    "environment": "mainnet",
+    "supportedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" },
+      { "_type": "reference", "_ref": "capability.token-balance" },
+      { "_type": "reference", "_ref": "capability.token-transfer-events" },
+      { "_type": "reference", "_ref": "capability.rpc-access" }
+    ],
+    "limitations": [],
+    "documentationUrl": "https://docs.optimism.io/"
+  },
+  {
+    "_id": "network.avalanche",
+    "_type": "network",
+    "name": "Avalanche C-Chain",
+    "slug": { "_type": "slug", "current": "avalanche" },
+    "type": "evm",
+    "chainId": "43114",
+    "environment": "mainnet",
+    "supportedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" },
+      { "_type": "reference", "_ref": "capability.token-balance" },
+      { "_type": "reference", "_ref": "capability.rpc-access" }
+    ],
+    "limitations": [],
+    "documentationUrl": "https://docs.avax.network/"
+  },
+  {
+    "_id": "network.bsc",
+    "_type": "network",
+    "name": "BNB Smart Chain",
+    "slug": { "_type": "slug", "current": "bsc" },
+    "type": "evm",
+    "chainId": "56",
+    "environment": "mainnet",
+    "supportedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" },
+      { "_type": "reference", "_ref": "capability.token-balance" },
+      { "_type": "reference", "_ref": "capability.rpc-access" }
+    ],
+    "limitations": [],
+    "documentationUrl": "https://docs.bnbchain.org/"
+  },
+  {
+    "_id": "network.solana",
+    "_type": "network",
+    "name": "Solana Mainnet-Beta",
+    "slug": { "_type": "slug", "current": "solana" },
+    "type": "non_evm",
+    "chainId": "101",
+    "environment": "mainnet",
+    "supportedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" },
+      { "_type": "reference", "_ref": "capability.token-balance" },
+      { "_type": "reference", "_ref": "capability.transaction-history" },
+      { "_type": "reference", "_ref": "capability.wallet-activity" },
+      { "_type": "reference", "_ref": "capability.rpc-access" }
+    ],
+    "limitations": [
+      {
+        "_type": "limitation",
+        "title": "Non-EVM Account Model",
+        "description": "Requires base58 public keys and distinct SPL token program account layout.",
+        "severity": "blocking"
+      }
+    ],
+    "documentationUrl": "https://docs.solana.com/"
+  },
+  {
+    "_id": "network.sepolia",
+    "_type": "network",
+    "name": "Sepolia Testnet",
+    "slug": { "_type": "slug", "current": "sepolia" },
+    "type": "evm",
+    "chainId": "11155111",
+    "environment": "testnet",
+    "supportedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" },
+      { "_type": "reference", "_ref": "capability.rpc-access" }
+    ],
+    "limitations": [],
+    "documentationUrl": "https://sepolia.otterscan.io/"
+  },
+  {
+    "_id": "network.base-sepolia",
+    "_type": "network",
+    "name": "Base Sepolia",
+    "slug": { "_type": "slug", "current": "base-sepolia" },
+    "type": "layer2",
+    "chainId": "84532",
+    "environment": "testnet",
+    "supportedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" },
+      { "_type": "reference", "_ref": "capability.token-transfer-events" },
+      { "_type": "reference", "_ref": "capability.rpc-access" }
+    ],
+    "limitations": [],
+    "documentationUrl": "https://docs.base.org/network-information"
+  }
+]

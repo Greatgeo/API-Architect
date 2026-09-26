@@ -1,0 +1,220 @@
+{
+  "version": "1.0.0",
+  "name": "API Architect Ground-Truth Benchmark Matrix",
+  "description": "Benchmark scenarios for evaluating structured reasoning over the Sanity knowledge dataset",
+  "scenarios": [
+    {
+      "id": "scenario-1-simple",
+      "title": "Simple Query — Ethereum Wallet Balance",
+      "requirement": {
+        "networks": ["ethereum"],
+        "capabilities": ["wallet_balance"]
+      },
+      "expectedCandidates": {
+        "compatible": [
+          "product.northstar-data",
+          "product.aster-wallet",
+          "product.helios-rpc"
+        ],
+        "conditional": [],
+        "incompatible": [
+          "product.solis-solana"
+        ],
+        "unknown": []
+      },
+      "evidenceReferences": [
+        "rule.aster-ethereum-base",
+        "rule.solis-ethereum-incompatible",
+        "endpoint.northstar.wallet-balance",
+        "endpoint.aster.wallet-balance",
+        "endpoint.helios.rpc"
+      ]
+    },
+    {
+      "id": "scenario-2-multi-network",
+      "title": "Multi-Network — Ethereum and Base Wallet Token Balances",
+      "requirement": {
+        "networks": ["ethereum", "base"],
+        "capabilities": ["token_balance"]
+      },
+      "expectedCandidates": {
+        "compatible": [
+          "product.aster-wallet"
+        ],
+        "conditional": [],
+        "incompatible": [
+          "product.northstar-data",
+          "product.solis-solana"
+        ],
+        "unknown": []
+      },
+      "evidenceReferences": [
+        "rule.aster-ethereum-base",
+        "rule.northstar-base-incompatible",
+        "endpoint.aster.token-balances",
+        "endpoint.northstar.token-balances"
+      ]
+    },
+    {
+      "id": "scenario-3-conditional",
+      "title": "Conditional Reasoning — Token Transfer Events with Webhook Notifications on Ethereum and Base",
+      "requirement": {
+        "networks": ["ethereum", "base"],
+        "capabilities": ["token_transfer_events", "webhook_notifications"]
+      },
+      "expectedCandidates": {
+        "compatible": [],
+        "conditional": [
+          "product.aster-wallet",
+          "product.orbit-event"
+        ],
+        "incompatible": [
+          "product.northstar-data",
+          "product.solis-solana"
+        ],
+        "unknown": []
+      },
+      "conditions": [
+        "Webhook registration required (/v2/webhooks/subscriptions or /v3/webhooks/destinations)",
+        "Destination URL must be public HTTPS with valid SSL certificate",
+        "Raw request buffer required for HMAC-SHA256 signature verification"
+      ],
+      "evidenceReferences": [
+        "rule.aster-token-transfers-webhooks",
+        "rule.orbit-webhooks-tls",
+        "rule.northstar-webhooks-incompatible",
+        "constraint.webhook-public-https",
+        "constraint.webhook-raw-body-hmac"
+      ]
+    },
+    {
+      "id": "scenario-4-incompatible",
+      "title": "Incompatible Query — Solana and Ethereum using EVM-only API",
+      "requirement": {
+        "networks": ["ethereum", "solana"],
+        "capabilities": ["wallet_balance"]
+      },
+      "expectedCandidates": {
+        "compatible": [],
+        "conditional": [],
+        "incompatible": [
+          "product.northstar-data",
+          "product.aster-wallet",
+          "product.solis-solana"
+        ],
+        "unknown": []
+      },
+      "explanation": "No single API in the controlled dataset natively bridges both EVM and Solana in a unified endpoint without protocol mismatch. Aster is EVM-only; Solis is Solana-only.",
+      "evidenceReferences": [
+        "rule.solis-ethereum-incompatible",
+        "rule.aster-solana-incompatible",
+        "constraint.solana-base58-addresses"
+      ]
+    },
+    {
+      "id": "scenario-5-authentication",
+      "title": "Authentication Filtering — Server-Side API Key Support",
+      "requirement": {
+        "authentication": "api_key",
+        "capabilities": ["wallet_balance"],
+        "networks": ["ethereum"]
+      },
+      "expectedCandidates": {
+        "compatible": [
+          "product.northstar-data",
+          "product.aster-wallet",
+          "product.helios-rpc"
+        ],
+        "conditional": [],
+        "incompatible": [],
+        "unknown": []
+      },
+      "evidenceReferences": [
+        "constraint.server-side-api-keys",
+        "product.northstar-data",
+        "product.aster-wallet"
+      ]
+    },
+    {
+      "id": "scenario-6-rate-limit",
+      "title": "Rate Limit Constraint — Minimum 20 Requests Per Second",
+      "requirement": {
+        "networks": ["ethereum"],
+        "capabilities": ["wallet_balance"],
+        "minRps": 20
+      },
+      "expectedCandidates": {
+        "compatible": [
+          "product.aster-wallet",
+          "product.helios-rpc"
+        ],
+        "conditional": [],
+        "incompatible": [
+          "product.northstar-data"
+        ],
+        "unknown": []
+      },
+      "evidenceReferences": [
+        "constraint.northstar-10-rps-cap",
+        "constraint.aster-25-rps-limit",
+        "product.northstar-data",
+        "product.aster-wallet"
+      ]
+    },
+    {
+      "id": "scenario-7-unknown",
+      "title": "Unknown / Insufficient Evidence — Avalanche Support on Northstar Data",
+      "requirement": {
+        "networks": ["avalanche"],
+        "product": "product.northstar-data"
+      },
+      "expectedCandidates": {
+        "compatible": [],
+        "conditional": [],
+        "incompatible": [],
+        "unknown": [
+          "product.northstar-data"
+        ]
+      },
+      "explanation": "Controlled dataset contains no documented evidence confirming or denying Avalanche support for Northstar Data. The system must report unknown rather than hallucinating or assuming unsupported.",
+      "evidenceReferences": [
+        "rule.northstar-avalanche-unknown"
+      ]
+    },
+    {
+      "id": "scenario-8-complex-architecture",
+      "title": "Complex Architecture — Wallet Activity Dashboard (Ethereum + Base + Transfers + Webhooks + API Key + >=20 RPS)",
+      "requirement": {
+        "networks": ["ethereum", "base"],
+        "capabilities": ["token_transfer_events", "webhook_notifications"],
+        "authentication": "api_key",
+        "minRps": 20
+      },
+      "expectedCandidates": {
+        "compatible": [],
+        "conditional": [
+          "product.aster-wallet"
+        ],
+        "incompatible": [
+          "product.northstar-data",
+          "product.orbit-event",
+          "product.solis-solana"
+        ],
+        "unknown": []
+      },
+      "evaluation": {
+        "product.aster-wallet": "Satisfies Ethereum + Base (compatible), Token Transfers (compatible), 25 RPS >= 20 RPS (compatible), API Key (compatible); Webhook push notifications are CONDITIONAL on registering a subscription endpoint.",
+        "product.northstar-data": "Fails Base support (incompatible), fails webhooks (incompatible), fails 20 RPS limit (10 RPS < 20 RPS).",
+        "product.orbit-event": "Satisfies networks and webhooks and 50 RPS, but requires Bearer token rather than API Key.",
+        "product.solis-solana": "Fails Ethereum and Base (incompatible, Solana only)."
+      },
+      "evidenceReferences": [
+        "rule.aster-ethereum-base",
+        "rule.aster-token-transfers-webhooks",
+        "constraint.aster-25-rps-limit",
+        "constraint.webhook-public-https",
+        "guide.wallet-activity-dashboard"
+      ]
+    }
+  ]
+}

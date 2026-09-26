@@ -1,0 +1,474 @@
+[
+  {
+    "_id": "guide.multi-chain-rpc",
+    "_type": "implementationGuide",
+    "title": "Connecting to a Multi-Chain RPC Gateway",
+    "slug": { "_type": "slug", "current": "connecting-to-multi-chain-rpc-gateway" },
+    "summary": "Best practices for dispatching JSON-RPC 2.0 requests across EVM networks using connection pooling and health checks.",
+    "technology": { "_type": "reference", "_ref": "tech.typescript" },
+    "prerequisites": [
+      "Node.js 20+",
+      "Helios Multi-Chain RPC API key",
+      "npm install node-fetch or native fetch"
+    ],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Configure Network Endpoint URLs",
+        "description": "Define base URLs for Ethereum and Base networks referencing server environment variables."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Format JSON-RPC 2.0 Payload",
+        "description": "Construct standard JSON payload with jsonrpc: '2.0', id, method (e.g. eth_getBalance), and params array."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 3,
+        "title": "Implement Timeout & Retry Wrapper",
+        "description": "Wrap fetch calls in an AbortController with a 4000ms timeout and exponential backoff retry."
+      }
+    ],
+    "commonProblems": [
+      {
+        "_type": "commonProblem",
+        "problem": "Socket exhaustion in serverless runtimes",
+        "cause": "Creating new HTTP connections on every RPC call without pooling.",
+        "solution": "Instantiate a persistent http.Agent with keepAlive: true."
+      }
+    ],
+    "relatedEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.helios.rpc" }
+    ],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.rpc-access" },
+      { "_type": "reference", "_ref": "capability.wallet-balance" }
+    ],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  },
+  {
+    "_id": "guide.wallet-token-balances",
+    "_type": "implementationGuide",
+    "title": "Reading Wallet Token Balances on Ethereum & Base",
+    "slug": { "_type": "slug", "current": "reading-wallet-token-balances-ethereum-base" },
+    "summary": "Step-by-step workflow for querying ERC-20 token holdings across Ethereum and Base simultaneously.",
+    "technology": { "_type": "reference", "_ref": "tech.typescript" },
+    "prerequisites": [
+      "Aster Wallet API key",
+      "Express backend proxy server"
+    ],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Validate Target Address",
+        "description": "Confirm the user address matches standard 0x hex format."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Query Multi-Chain Balances Concurrently",
+        "description": "Execute Promise.allSettled() querying Aster Wallet endpoints for both 'ethereum' and 'base'."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 3,
+        "title": "Format Decimal Units",
+        "description": "Convert raw token balance strings using token decimals metadata."
+      }
+    ],
+    "commonProblems": [
+      {
+        "_type": "commonProblem",
+        "problem": "Precision loss with BigInt values",
+        "cause": "Converting large 18-decimal token wei integers to JavaScript Number primitives.",
+        "solution": "Use BigInt or formatting libraries (e.g. ethers or viem formatUnits)."
+      }
+    ],
+    "relatedEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.aster.token-balances" },
+      { "_type": "reference", "_ref": "endpoint.aster.wallet-balance" }
+    ],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.token-balance" },
+      { "_type": "reference", "_ref": "capability.wallet-balance" }
+    ],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  },
+  {
+    "_id": "guide.token-transfer-webhooks",
+    "_type": "implementationGuide",
+    "title": "Real-Time Token Transfer Event Webhooks",
+    "slug": { "_type": "slug", "current": "real-time-token-transfer-event-webhooks" },
+    "summary": "Configuring push notifications for ERC-20 transfers across Ethereum and Base using Orbit Gateway and Aster Protocol.",
+    "technology": { "_type": "reference", "_ref": "tech.express" },
+    "prerequisites": [
+      "Public HTTPS domain or ngrok tunnel",
+      "Express server",
+      "Orbit or Aster API credentials"
+    ],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Create Inbound Webhook Listener Route",
+        "description": "Define POST /api/webhooks/transfers with express.raw middleware for HMAC validation."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Register Subscription with API Provider",
+        "description": "Send POST request to Orbit/Aster registering the public webhook destination URL and target networks ['ethereum', 'base']."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 3,
+        "title": "Handle Incoming Events Asynchronously",
+        "description": "Acknowledge HTTP 200 immediately, then forward payload to internal event processing worker."
+      }
+    ],
+    "commonProblems": [
+      {
+        "_type": "commonProblem",
+        "problem": "Provider deactivates webhook after 3 failures",
+        "cause": "Destination server taking longer than 5000ms to process event and reply.",
+        "solution": "Send res.status(200).send('OK') before initiating database writes."
+      }
+    ],
+    "relatedEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.orbit.webhooks-create" },
+      { "_type": "reference", "_ref": "endpoint.aster.webhooks-register" }
+    ],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.webhook-notifications" },
+      { "_type": "reference", "_ref": "capability.token-transfer-events" }
+    ],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  },
+  {
+    "_id": "guide.webhook-hmac-verification",
+    "_type": "implementationGuide",
+    "title": "Verifying Inbound Webhook HMAC Signatures",
+    "slug": { "_type": "slug", "current": "verifying-inbound-webhook-hmac-signatures" },
+    "summary": "Robust Node.js crypto recipe for verifying x-signature headers against the raw request buffer to prevent replay and spoofing attacks.",
+    "technology": { "_type": "reference", "_ref": "tech.nodejs" },
+    "prerequisites": [
+      "Shared webhook secret",
+      "crypto built-in module"
+    ],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Capture Raw Request Buffer",
+        "description": "Access req.body as Buffer before JSON.parse mutation."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Compute HMAC-SHA256 Digest",
+        "description": "Use crypto.createHmac('sha256', SECRET).update(rawBuffer).digest('hex')."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 3,
+        "title": "Constant-Time Comparison",
+        "description": "Compare computed signature with header using crypto.timingSafeEqual() to prevent timing attacks."
+      }
+    ],
+    "commonProblems": [],
+    "relatedEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.orbit.webhooks-create" }
+    ],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.webhook-notifications" }
+    ],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  },
+  {
+    "_id": "guide.api-rate-limit-handling",
+    "_type": "implementationGuide",
+    "title": "Handling API Rate Limits & Exponential Backoff",
+    "slug": { "_type": "slug", "current": "handling-api-rate-limits-exponential-backoff" },
+    "summary": "Defensive client-side architecture for managing provider rate limits (e.g. Northstar 10 RPS, Aster 25 RPS) with jittered backoff.",
+    "technology": { "_type": "reference", "_ref": "tech.typescript" },
+    "prerequisites": [],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Inspect HTTP 429 and Retry-After Header",
+        "description": "Read response status and parse Retry-After header if supplied."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Calculate Jittered Backoff Delay",
+        "description": "Apply delay = Math.min(maxDelay, baseDelay * 2 ** attempt + Math.random() * 200)."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 3,
+        "title": "Implement Local Token Bucket",
+        "description": "Throttle outgoing requests on client before hitting the network."
+      }
+    ],
+    "commonProblems": [],
+    "relatedEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.northstar.wallet-balance" }
+    ],
+    "relatedCapabilities": [],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  },
+  {
+    "_id": "guide.retry-failover-design",
+    "_type": "implementationGuide",
+    "title": "Implementing Retry and Multi-Provider Failover Logic",
+    "slug": { "_type": "slug", "current": "retry-and-multi-provider-failover-logic" },
+    "summary": "Building resilient fallback pipelines that switch between primary and secondary providers when errors or outages occur.",
+    "technology": { "_type": "reference", "_ref": "tech.typescript" },
+    "prerequisites": [],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Define Provider Fallback Hierarchy",
+        "description": "Establish primary candidate (e.g. Aster Wallet) and secondary candidate (e.g. Helios RPC)."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Detect Failover Triggers",
+        "description": "Trigger failover on 502/503/504 errors or consecutive timeouts."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 3,
+        "title": "Circuit Breaker Implementation",
+        "description": "Temporarily demote failing provider for 60 seconds before probing health again."
+      }
+    ],
+    "commonProblems": [],
+    "relatedEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.aster.wallet-balance" },
+      { "_type": "reference", "_ref": "endpoint.helios.rpc" }
+    ],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-balance" }
+    ],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  },
+  {
+    "_id": "guide.secure-api-key-handling",
+    "_type": "implementationGuide",
+    "title": "Protecting API Credentials in Server-Side Architecture",
+    "slug": { "_type": "slug", "current": "protecting-api-credentials-server-side" },
+    "summary": "Ensuring private keys and provider tokens are confined strictly to Node.js / Express backend proxies without leaking to frontend Vite bundles.",
+    "technology": { "_type": "reference", "_ref": "tech.express" },
+    "prerequisites": [
+      "dotenv or native process.env",
+      "Express backend"
+    ],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Audit Frontend Environment Variables",
+        "description": "Confirm that provider API keys DO NOT carry VITE_ prefixes."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Build Backend Gateway Endpoint",
+        "description": "Create route /api/wallet/:address attaching Authorization: Bearer process.env.ASTER_API_KEY."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 3,
+        "title": "Sanitize Outbound Responses",
+        "description": "Filter vendor response objects so internal tokens or debugging headers are never passed to the client."
+      }
+    ],
+    "commonProblems": [],
+    "relatedEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.northstar.wallet-balance" }
+    ],
+    "relatedCapabilities": [],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  },
+  {
+    "_id": "guide.multi-network-routing",
+    "_type": "implementationGuide",
+    "title": "Handling Multiple Blockchain Networks Dynamically",
+    "slug": { "_type": "slug", "current": "handling-multiple-blockchain-networks-dynamically" },
+    "summary": "Architectural pattern for routing user requests to correct network RPC or REST endpoints based on chain ID or slug.",
+    "technology": { "_type": "reference", "_ref": "tech.typescript" },
+    "prerequisites": [],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Maintain Centralized Network Registry",
+        "description": "Define typed dictionary mapping chainId (1, 8453) to slug, name, and provider endpoint."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Validate Active Chain Support",
+        "description": "Check if chosen provider lists target network in its supportedNetworks array."
+      }
+    ],
+    "commonProblems": [],
+    "relatedEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.aster.token-balances" },
+      { "_type": "reference", "_ref": "endpoint.helios.rpc" }
+    ],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.multi-chain-aggregation" }
+    ],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  },
+  {
+    "_id": "guide.polling-when-no-webhooks",
+    "_type": "implementationGuide",
+    "title": "Polling Fallback Architecture When Webhooks Are Unavailable",
+    "slug": { "_type": "slug", "current": "polling-fallback-architecture-when-no-webhooks" },
+    "summary": "How to structure an efficient polling loop for providers like Northstar Data that do not offer real-time push webhooks.",
+    "technology": { "_type": "reference", "_ref": "tech.typescript" },
+    "prerequisites": [],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Track High-Water Mark Block Number",
+        "description": "Store the last observed block number or transaction hash in local state."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Schedule Interval Query with Safety Gap",
+        "description": "Poll every 12 seconds querying transactions where blockNumber > lastSeenBlock."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 3,
+        "title": "Deduplicate Events",
+        "description": "Use a Set of transaction hashes to ignore duplicate items during re-orgs."
+      }
+    ],
+    "commonProblems": [],
+    "relatedEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.northstar.tx-history" }
+    ],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.token-transfer-events" }
+    ],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  },
+  {
+    "_id": "guide.wallet-activity-dashboard",
+    "_type": "implementationGuide",
+    "title": "Building a Real-Time Wallet Activity Dashboard",
+    "slug": { "_type": "slug", "current": "building-real-time-wallet-activity-dashboard" },
+    "summary": "Full-stack implementation guide integrating React UI with Express backend to stream token transfers on Ethereum and Base.",
+    "technology": { "_type": "reference", "_ref": "tech.typescript" },
+    "prerequisites": [
+      "Aster Wallet API",
+      "Express server",
+      "React 19"
+    ],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Establish Express Ingestion Endpoint",
+        "description": "Create webhook receiver on Express server."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Server-Sent Events Broadcast to Client",
+        "description": "Relay incoming transfer events to React client via SSE stream."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 3,
+        "title": "Render Reactive Feed in React",
+        "description": "Prepend new transfer rows to activity feed table."
+      }
+    ],
+    "commonProblems": [],
+    "relatedEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.aster.transfer-events" },
+      { "_type": "reference", "_ref": "endpoint.aster.token-balances" }
+    ],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.wallet-activity" },
+      { "_type": "reference", "_ref": "capability.token-transfer-events" }
+    ],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  },
+  {
+    "_id": "guide.portfolio-aggregation-flow",
+    "_type": "implementationGuide",
+    "title": "Building a Cross-Chain Portfolio Aggregation Pipeline",
+    "slug": { "_type": "slug", "current": "cross-chain-portfolio-aggregation-pipeline" },
+    "summary": "Fetching and standardizing asset balances across multiple Layer-1 and Layer-2 blockchains into a single USD portfolio view.",
+    "technology": { "_type": "reference", "_ref": "tech.typescript" },
+    "prerequisites": [
+      "Nexus Portfolio API key"
+    ],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Invoke Aggregation Endpoint",
+        "description": "Request GET /v1/portfolio/{address} with requested networks."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Cache Results in Memory",
+        "description": "Store response for 60 seconds to satisfy the 15 RPS limit."
+      }
+    ],
+    "commonProblems": [],
+    "relatedEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.nexus.portfolio" }
+    ],
+    "relatedCapabilities": [
+      { "_type": "reference", "_ref": "capability.portfolio-aggregation" },
+      { "_type": "reference", "_ref": "capability.multi-chain-aggregation" }
+    ],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  },
+  {
+    "_id": "guide.unsupported-networks-graceful",
+    "_type": "implementationGuide",
+    "title": "Handling Unsupported Networks Gracefully",
+    "slug": { "_type": "slug", "current": "handling-unsupported-networks-gracefully" },
+    "summary": "Engineering reliable fallback UI and error handling when a user requests an unsupported blockchain (e.g. Base on Northstar or Solana on EVM).",
+    "technology": { "_type": "reference", "_ref": "tech.typescript" },
+    "prerequisites": [],
+    "steps": [
+      {
+        "_type": "implementationStep",
+        "order": 1,
+        "title": "Pre-Check Network Compatibility",
+        "description": "Query Sanity compatibility rules before making network calls."
+      },
+      {
+        "_type": "implementationStep",
+        "order": 2,
+        "title": "Display Actionable Warning Badge",
+        "description": "Inform developer why candidate is incompatible and offer verified alternatives."
+      }
+    ],
+    "commonProblems": [],
+    "relatedEndpoints": [],
+    "relatedCapabilities": [],
+    "source": "Controlled demo dataset - Architectural Guidance"
+  }
+]

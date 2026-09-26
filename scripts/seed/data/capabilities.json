@@ -1,0 +1,404 @@
+[
+  {
+    "_id": "capability.wallet-balance",
+    "_type": "capability",
+    "name": "wallet_balance",
+    "slug": { "_type": "slug", "current": "wallet-balance" },
+    "description": "Fetch native gas token balance (e.g. ETH, MATIC, SOL) for a designated wallet address.",
+    "category": "wallet",
+    "requirements": [
+      {
+        "_type": "requirement",
+        "name": "Valid Address Format",
+        "type": "other",
+        "description": "0x-prefixed hex string for EVM or base58 for Solana."
+      }
+    ],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" },
+      { "_type": "reference", "_ref": "network.arbitrum" },
+      { "_type": "reference", "_ref": "network.optimism" },
+      { "_type": "reference", "_ref": "network.avalanche" },
+      { "_type": "reference", "_ref": "network.bsc" },
+      { "_type": "reference", "_ref": "network.solana" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.northstar.wallet-balance" },
+      { "_type": "reference", "_ref": "endpoint.aster.wallet-balance" },
+      { "_type": "reference", "_ref": "endpoint.helios.rpc" },
+      { "_type": "reference", "_ref": "endpoint.solis.balance" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.token-balance",
+    "_type": "capability",
+    "name": "token_balance",
+    "slug": { "_type": "slug", "current": "token-balance" },
+    "description": "Retrieve balances for fungible tokens (ERC-20, SPL) held by a wallet address.",
+    "category": "token",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" },
+      { "_type": "reference", "_ref": "network.arbitrum" },
+      { "_type": "reference", "_ref": "network.optimism" },
+      { "_type": "reference", "_ref": "network.solana" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.northstar.token-balances" },
+      { "_type": "reference", "_ref": "endpoint.aster.token-balances" },
+      { "_type": "reference", "_ref": "endpoint.solis.tokens" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.token-transfer-events",
+    "_type": "capability",
+    "name": "token_transfer_events",
+    "slug": { "_type": "slug", "current": "token-transfer-events" },
+    "description": "Stream or query indexed transfer events (sender, recipient, token amount, contract address) across blocks.",
+    "category": "events",
+    "requirements": [
+      {
+        "_type": "requirement",
+        "name": "Target Contract or Wallet Filter",
+        "type": "other",
+        "description": "Specify token contract or wallet address to avoid unbounded block queries."
+      }
+    ],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.arbitrum" },
+      { "_type": "reference", "_ref": "network.optimism" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.aster.transfer-events" },
+      { "_type": "reference", "_ref": "endpoint.orbit.stream-events" },
+      { "_type": "reference", "_ref": "endpoint.quanta.logs" }
+    ],
+    "limitations": [
+      {
+        "_type": "limitation",
+        "title": "Historical Depth Bounds",
+        "description": "Free tiers limit historical range queries to the most recent 100,000 blocks.",
+        "severity": "warning"
+      }
+    ]
+  },
+  {
+    "_id": "capability.transaction-history",
+    "_type": "capability",
+    "name": "transaction_history",
+    "slug": { "_type": "slug", "current": "transaction-history" },
+    "description": "Paginated list of historical transactions initiated by or targeting a specific wallet address.",
+    "category": "transaction",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" },
+      { "_type": "reference", "_ref": "network.solana" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.northstar.tx-history" },
+      { "_type": "reference", "_ref": "endpoint.aster.tx-history" },
+      { "_type": "reference", "_ref": "endpoint.solis.tx-history" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.transaction-lookup",
+    "_type": "capability",
+    "name": "transaction_lookup",
+    "slug": { "_type": "slug", "current": "transaction-lookup" },
+    "description": "Retrieve comprehensive transaction payload, receipt, execution status, and logs by transaction hash.",
+    "category": "transaction",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" },
+      { "_type": "reference", "_ref": "network.arbitrum" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.northstar.tx-lookup" },
+      { "_type": "reference", "_ref": "endpoint.helios.rpc" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.wallet-activity",
+    "_type": "capability",
+    "name": "wallet_activity",
+    "slug": { "_type": "slug", "current": "wallet-activity" },
+    "description": "Consolidated activity feed aggregating transfers, contract approvals, swaps, and gas expenditures.",
+    "category": "analytics",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.solana" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.beacon.activity" },
+      { "_type": "reference", "_ref": "endpoint.zenith.activity-stream" },
+      { "_type": "reference", "_ref": "endpoint.solis.activity" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.block-lookup",
+    "_type": "capability",
+    "name": "block_lookup",
+    "slug": { "_type": "slug", "current": "block-lookup" },
+    "description": "Query block details by number or hash, including timestamp, gas used, base fee, and transaction hashes.",
+    "category": "rpc",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.helios.rpc" },
+      { "_type": "reference", "_ref": "endpoint.quanta.block" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.contract-event-logs",
+    "_type": "capability",
+    "name": "contract_event_logs",
+    "slug": { "_type": "slug", "current": "contract-event-logs" },
+    "description": "Query raw smart contract log receipts filtered by address and indexed 32-byte topics (eth_getLogs).",
+    "category": "events",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.quanta.logs" },
+      { "_type": "reference", "_ref": "endpoint.helios.rpc" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.webhook-notifications",
+    "_type": "capability",
+    "name": "webhook_notifications",
+    "slug": { "_type": "slug", "current": "webhook-notifications" },
+    "description": "Receive immediate server-to-server HTTP POST notifications when designated on-chain activities occur.",
+    "category": "webhooks",
+    "requirements": [
+      {
+        "_type": "requirement",
+        "name": "Public HTTPS Webhook URL",
+        "type": "webhook_receiver",
+        "description": "A public HTTPS endpoint with valid SSL certificate responding with HTTP 200 within 5 seconds."
+      },
+      {
+        "_type": "requirement",
+        "name": "Webhook Subscription Creation",
+        "type": "other",
+        "description": "Must register webhook destination URL and event filter rules prior to event dispatch."
+      }
+    ],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" },
+      { "_type": "reference", "_ref": "network.arbitrum" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.orbit.webhooks-create" },
+      { "_type": "reference", "_ref": "endpoint.aster.webhooks-register" }
+    ],
+    "limitations": [
+      {
+        "_type": "limitation",
+        "title": "Webhook Configuration Required",
+        "description": "Requires establishing a webhook registration record and HMAC secret exchange before events trigger.",
+        "severity": "warning"
+      }
+    ]
+  },
+  {
+    "_id": "capability.nft-ownership",
+    "_type": "capability",
+    "name": "nft_ownership",
+    "slug": { "_type": "slug", "current": "nft-ownership" },
+    "description": "Enumerate ERC-721 and ERC-1155 token IDs owned by a target wallet address.",
+    "category": "nft",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.nexus.nft-owner" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.nft-metadata",
+    "_type": "capability",
+    "name": "nft_metadata",
+    "slug": { "_type": "slug", "current": "nft-metadata" },
+    "description": "Retrieve resolved JSON metadata, IPFS gateway assets, and attributes for a specific token ID.",
+    "category": "nft",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.nexus.nft-meta" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.portfolio-aggregation",
+    "_type": "capability",
+    "name": "portfolio_aggregation",
+    "slug": { "_type": "slug", "current": "portfolio-aggregation" },
+    "description": "Calculate total portfolio net worth in USD by aggregating native coins, ERC-20 tokens, and DeFi positions.",
+    "category": "portfolio",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" },
+      { "_type": "reference", "_ref": "network.arbitrum" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.nexus.portfolio" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.token-metadata",
+    "_type": "capability",
+    "name": "token_metadata",
+    "slug": { "_type": "slug", "current": "token-metadata" },
+    "description": "Retrieve contract metadata including name, symbol, decimals, and icon URL.",
+    "category": "token",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.northstar.token-meta" },
+      { "_type": "reference", "_ref": "endpoint.aster.token-meta" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.address-monitoring",
+    "_type": "capability",
+    "name": "address_monitoring",
+    "slug": { "_type": "slug", "current": "address-monitoring" },
+    "description": "Continuous monitoring of designated addresses with automated threshold alerting.",
+    "category": "analytics",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.beacon.monitor" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.rpc-access",
+    "_type": "capability",
+    "name": "rpc_access",
+    "slug": { "_type": "slug", "current": "rpc-access" },
+    "description": "Direct JSON-RPC proxy execution for standard protocol methods (eth_call, eth_getBalance, etc.).",
+    "category": "rpc",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" },
+      { "_type": "reference", "_ref": "network.arbitrum" },
+      { "_type": "reference", "_ref": "network.optimism" },
+      { "_type": "reference", "_ref": "network.avalanche" },
+      { "_type": "reference", "_ref": "network.bsc" },
+      { "_type": "reference", "_ref": "network.solana" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.helios.rpc" },
+      { "_type": "reference", "_ref": "endpoint.solis.rpc" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.smart-contract-calls",
+    "_type": "capability",
+    "name": "smart_contract_calls",
+    "slug": { "_type": "slug", "current": "smart-contract-calls" },
+    "description": "Execute read-only smart contract view functions without publishing an on-chain transaction.",
+    "category": "rpc",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.arbitrum" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.helios.rpc" },
+      { "_type": "reference", "_ref": "endpoint.vanguard.simulate" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.gas-estimation",
+    "_type": "capability",
+    "name": "gas_estimation",
+    "slug": { "_type": "slug", "current": "gas-estimation" },
+    "description": "Compute recommended EIP-1559 maxPriorityFeePerGas, maxFeePerGas, and estimated execution units.",
+    "category": "analytics",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" },
+      { "_type": "reference", "_ref": "network.arbitrum" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.vanguard.gas" },
+      { "_type": "reference", "_ref": "endpoint.helios.rpc" }
+    ],
+    "limitations": []
+  },
+  {
+    "_id": "capability.multi-chain-aggregation",
+    "_type": "capability",
+    "name": "multi_chain_aggregation",
+    "slug": { "_type": "slug", "current": "multi-chain-aggregation" },
+    "description": "Aggregate balances or transaction histories across multiple networks into a unified JSON response.",
+    "category": "portfolio",
+    "requirements": [],
+    "supportedNetworks": [
+      { "_type": "reference", "_ref": "network.ethereum" },
+      { "_type": "reference", "_ref": "network.base" },
+      { "_type": "reference", "_ref": "network.polygon" },
+      { "_type": "reference", "_ref": "network.arbitrum" }
+    ],
+    "compatibleEndpoints": [
+      { "_type": "reference", "_ref": "endpoint.nexus.portfolio" }
+    ],
+    "limitations": []
+  }
+]

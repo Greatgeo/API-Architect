@@ -1,0 +1,6 @@
+{
+  "name": "API Architect",
+  "description": "Turn developer requirements into verified API implementation plans using structured content and evidence-based reasoning.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

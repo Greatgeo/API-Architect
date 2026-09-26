@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Architect — Verified API Implementation Plans</title>
+    <meta name="description" content="Turn developer requirements into verified API implementation plans using structured content and evidence-based reasoning." />
+    <meta property="og:title" content="API Architect — Verified API Implementation Plans" />
+    <meta property="og:description" content="Turn developer requirements into verified API implementation plans using structured content and evidence-based reasoning." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      (function() {
+        function isIgnoredExtensionError(err) {
+          if (!err) return false;
+          var str = (typeof err === 'string') ? err : (err.message || err.reason || String(err));
+          return /metamask|ethereum|failed to connect/i.test(str);
+        }
+
+        // Intercept unhandled promise rejections in capture phase
+        window.addEventListener('unhandledrejection', function(event) {
+          if (isIgnoredExtensionError(event.reason)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
+
+        // Intercept window error events in capture phase
+        window.addEventListener('error', function(event) {
+          if (isIgnoredExtensionError(event.message || event.error)) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            return true;
+          }
+        }, true);
+
+        // Filter console.error from extension scripts
+        var origConsoleError = console.error;
+        console.error = function() {
+          var args = Array.prototype.slice.call(arguments);
+          var hasExtError = args.some(function(arg) {
+            return isIgnoredExtensionError(arg);
+          });
+          if (hasExtError) {
+            return;
+          }
+          origConsoleError.apply(console, arguments);
+        };
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
