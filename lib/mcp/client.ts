@@ -123,11 +123,22 @@ export class SanityContextClient {
           errorMsg.toLowerCase().includes('unauthorized') ||
           errorMsg.toLowerCase().includes('forbidden');
 
+        const isUnreachable =
+          !isAuthError &&
+          (errorMsg.toLowerCase().includes('connection') ||
+            errorMsg.toLowerCase().includes('failed to query') ||
+            errorMsg.toLowerCase().includes('abort') ||
+            errorMsg.toLowerCase().includes('timeout') ||
+            errorMsg.toLowerCase().includes('econnrefused') ||
+            errorMsg.toLowerCase().includes('fetch failed'));
+
+        const status = isAuthError ? 'auth_failure' : isUnreachable ? 'unreachable' : 'error';
+
         return {
           configured: true,
           connected: false,
           mode: 'LOCAL_FALLBACK',
-          status: isAuthError ? 'auth_failure' : 'error',
+          status,
           endpointUrl: this.endpointUrl,
           projectId: this.projectId,
           dataset: this.dataset,
